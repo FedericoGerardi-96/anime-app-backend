@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   Request,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
@@ -17,6 +16,7 @@ import {
   UpdateAuthDto,
   LoginDto,
   RegisterUserDto,
+  OAuthlogin,
 } from './dto';
 import { AuthGuard } from './guards/auth.guard';
 import { User } from './entities/user.entity';
@@ -26,6 +26,7 @@ import { ParseMongoIdPipe } from 'src/common/pipes/parse-mongo-id.pipe';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(AuthGuard)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.authService.create(createUserDto);
@@ -34,6 +35,11 @@ export class AuthController {
   @Post('/login')
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Post('/OAuthlogin')
+  oAuthlogin(@Body() oAuthlogin: OAuthlogin) {
+    return this.authService.oAuthlogin(oAuthlogin);
   }
 
   @Post('/register')
@@ -47,8 +53,10 @@ export class AuthController {
     return this.authService.findAll();
   }
 
+  @UseGuards(AuthGuard)
   @Get('/user/:id')
   findById(@Param('id', ParseMongoIdPipe) id: string) {
+    console.log("oAuthlogin")
     return this.authService.findById(id);
   }
 
@@ -63,13 +71,15 @@ export class AuthController {
     };
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-  //   return this.authService.update(+id, updateAuthDto);
-  // }
+  @UseGuards(AuthGuard)
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
+    return this.authService.update(id, updateAuthDto);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.authService.remove(+id);
-  // }
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.authService.remove(id);
+  }
 }

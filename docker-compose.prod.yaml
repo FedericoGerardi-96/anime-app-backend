@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  anime-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: anime-docker
+    container_name: anime-app
+    restart: always # reiniciar el contenedor si se detiene
+    ports:
+      - '${PORT}:${PORT}'
+    environment:
+      MONGO_URL: ${MONGO_URL}
+      PORT: ${PORT}
+      JWT_SEED: ${JWT_SEED}
+      NODE_ENV: ${NODE_ENV}

@@ -1,5 +1,4 @@
 import {
-  ArgumentMetadata,
   BadRequestException,
   Injectable,
   PipeTransform,
@@ -8,7 +7,7 @@ import { isValidObjectId } from 'mongoose';
 
 @Injectable()
 export class ParseMongoIdPipe implements PipeTransform {
-  transform(value: string, metadata: ArgumentMetadata) {
+  transform(value: string) {
     if (!isValidObjectId(value)) {
       throw new BadRequestException(`${value} is not valid MongoID`);
     }

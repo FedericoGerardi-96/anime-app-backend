@@ -6,11 +6,10 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 
 import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
-import { EnvConfiguration } from './config/env.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ load: [EnvConfiguration] }),
+    ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URL),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),

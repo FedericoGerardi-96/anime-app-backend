@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Injectable,
@@ -10,7 +11,13 @@ import { Model, isValidObjectId } from 'mongoose';
 
 import * as bcryptjs from 'bcryptjs';
 
-import { CreateUserDto, UpdateAuthDto, LoginDto, UserIdDto } from './dto';
+import {
+  CreateUserDto,
+  UpdateAuthDto,
+  LoginDto,
+  UserIdDto,
+  OAuthlogin,
+} from './dto';
 import { User } from './entities/user.entity';
 import { LoginResponse, RegisterResponse, JwtPayload } from './interfaces';
 
@@ -45,6 +52,8 @@ export class AuthService {
   async register(createUserDto: CreateUserDto): Promise<RegisterResponse> {
     const newUser = await this.create(createUserDto);
 
+    if(!newUser) throw new BadRequestException('Something terrible happen to register user');
+
     return {
       user: newUser,
       token: this.getJwtToken({ id: newUser._id }),
@@ -65,9 +74,42 @@ export class AuthService {
     }
 
     const { password: _, ...userWithoutPassword } = findUser.toJSON();
+
     return {
       user: userWithoutPassword,
       token: this.getJwtToken({ id: findUser.id }),
+    };
+  }
+
+  async oAuthlogin(oAuthlogin: OAuthlogin) {
+    const { email, name, icon } = oAuthlogin;
+
+    const findUser = await this._userModel.findOne({ email });
+
+    if (findUser) {
+      const { password: _, ...userWithoutPassword } = findUser.toJSON();
+
+      return {
+        user: userWithoutPassword,
+        token: this.getJwtToken({ id: findUser.id }),
+      };
+    }
+
+    const newUserRegister = await this.register({
+      email,
+      name,
+      icon,
+      password: '@',
+    });
+
+    if(!newUserRegister) throw new BadRequestException('Something terrible happen to register user');
+
+    const { user, token } = newUserRegister;
+
+    const { password: _, ...userRegisterWithoutPassword } = user.toJSON();
+    return {
+      user: userRegisterWithoutPassword,
+      token: token,
     };
   }
 
@@ -90,11 +132,25 @@ export class AuthService {
     return userWithoutPassword;
   }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
+  async update(id: string, updateAuthDto: UpdateAuthDto) {
+    try {
+      const { password, ...userData } = updateAuthDto;
+
+      const updateUser = await this._userModel.findByIdAndUpdate(id, {
+        password: bcryptjs.hashSync(password, 10),
+        ...userData,
+      });
+
+      await updateUser.save();
+      const { password: _, ...user } = updateUser.toJSON();
+
+      return user;
+    } catch (error: any) {
+      throw new InternalServerErrorException('Something terrible happen');
+    }
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     const { deletedCount, acknowledged } = await this._userModel.deleteOne({
       _id: id,
     });

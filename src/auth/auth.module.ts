@@ -15,7 +15,7 @@ import { User, UserSchema } from './entities/user.entity';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SEED,
+      secret: process.env.JWT_SEED || '%#Yukino%#Yukinoshita5645#@%#',
       signOptions: { expiresIn: '24h' },
     }),
   ],

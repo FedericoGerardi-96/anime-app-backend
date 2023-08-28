@@ -12,7 +12,7 @@ export class User extends Document {
   password?: string;
   @Prop({ default: true })
   isActive: boolean;
-  @Prop()
+  @Prop({ default: "https://res.cloudinary.com/do3n04ysn/image/upload/v1692600735/anime-app/gw87wdnbncrslkemdxe4.png" })
   icon: string;
   @Prop({ type: [String], default: ['muggle'] })
   roles: string[];
