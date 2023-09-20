@@ -6,5 +6,5 @@ export class OAuthlogin {
   @IsString()
   readonly name: string;
   @IsOptional()
-  readonly icon: string;
+  readonly icon: string | null;
 }

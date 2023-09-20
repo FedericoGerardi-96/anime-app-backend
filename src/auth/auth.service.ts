@@ -17,15 +17,19 @@ import {
   LoginDto,
   UserIdDto,
   OAuthlogin,
+  RegisterUserDto,
 } from './dto';
 import { User } from './entities/user.entity';
 import { LoginResponse, RegisterResponse, JwtPayload } from './interfaces';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { UploadApiErrorResponse, UploadApiResponse } from 'cloudinary';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel(User.name) private _userModel: Model<User>,
     private _jwtService: JwtService,
+    private _cloudinary: CloudinaryService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -43,17 +47,44 @@ export class AuthService {
       return user;
     } catch (error: any) {
       if (error.code === 11000) {
-        throw new BadRequestException(`${createUserDto.email} already exists`);
+        throw new BadRequestException(
+          `Email: ${createUserDto.email} already exists`,
+        );
       }
       throw new InternalServerErrorException('Something terrible happen');
     }
   }
 
-  async register(createUserDto: CreateUserDto): Promise<RegisterResponse> {
-    const newUser = await this.create(createUserDto);
+  async updateUserAvatar(id: string, file: Express.Multer.File) {
+    const findUser = await this._userModel.findById(id);
 
-    if(!newUser) throw new BadRequestException('Something terrible happen to register user');
+    if (!findUser) {
+      throw new BadRequestException(`User with id ${id} not found`);
+    }
 
+    const { secure_url } = await this._cloudinary.uploadFile(file);
+
+    const updateUser = await this._userModel.findByIdAndUpdate(id, {
+      icon: secure_url,
+    });
+
+    await updateUser.save();
+    const { password: _, ...user } = updateUser.toJSON();
+
+    return {
+      user: user,
+      token: this.getJwtToken({ id: user._id }),
+    };
+  }
+
+  async register(registerUserDto: RegisterUserDto): Promise<RegisterResponse> {
+    const newUser = await this.create(registerUserDto);
+
+    if (!newUser) {
+      throw new BadRequestException(
+        'Something terrible happen to register user',
+      );
+    }
     return {
       user: newUser,
       token: this.getJwtToken({ id: newUser._id }),
@@ -102,7 +133,10 @@ export class AuthService {
       password: '@',
     });
 
-    if(!newUserRegister) throw new BadRequestException('Something terrible happen to register user');
+    if (!newUserRegister)
+      throw new BadRequestException(
+        'Something terrible happen to register user',
+      );
 
     const { user, token } = newUserRegister;
 

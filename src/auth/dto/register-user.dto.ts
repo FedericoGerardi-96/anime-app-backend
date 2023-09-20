@@ -5,9 +5,9 @@ export class RegisterUserDto {
   readonly email: string;
   @IsString()
   readonly name: string;
-  @IsString()
   @IsOptional()
-  readonly icon: string;
+  readonly icon: string | null;
   @MinLength(8)
   readonly password: string;
 }
+

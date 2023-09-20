@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User, UserSchema } from './entities/user.entity';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
   controllers: [AuthController],
@@ -18,6 +19,7 @@ import { User, UserSchema } from './entities/user.entity';
       secret: process.env.JWT_SEED || '%#Yukino%#Yukinoshita5645#@%#',
       signOptions: { expiresIn: '24h' },
     }),
+    CloudinaryModule,
   ],
 })
 export class AuthModule {}

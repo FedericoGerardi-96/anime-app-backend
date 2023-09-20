@@ -8,5 +8,5 @@ export class CreateUserDto {
   @MinLength(8)
   readonly password: string;
   @IsOptional()
-  readonly icon: string;
+  readonly icon: string | null;
 }
