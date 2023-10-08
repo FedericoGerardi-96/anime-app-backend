@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { MyAnimeListModule } from './my-anime-list/my-anime-list.module';
+import { AnimeModule } from './anime/anime.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MyAnimeListModule } from './my-anime-list/my-anime-list.module';
     CommonModule,
     CloudinaryModule,
     MyAnimeListModule,
+    AnimeModule,
   ],
   controllers: [],
   providers: [],
